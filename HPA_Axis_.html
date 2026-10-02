@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPA Axis — Interactive Aging Presentation</title>
+<style>
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:#ffffff;
+    font-family: Georgia, "Times New Roman", serif;
+    color:#555;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+  }
+  .card{
+    width:min(1100px,94vw);
+    border:1px solid #e5e5e5;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 5px 22px rgba(0,0,0,.07);
+    background:#fff;
+  }
+  .visual{
+    height:500px;
+    position:relative;
+    background:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  .caption{
+    border-top:1px solid #eee;
+    background:#f8f8f8;
+    text-align:center;
+    padding:24px 20px 18px;
+    font-size:22px;
+    min-height:92px;
+  }
+  .controls{
+    background:#f8f8f8;
+    padding:0 25px 25px;
+  }
+  .track{
+    position:relative;
+    height:16px;
+    background:#e7e7e7;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .progress{
+    position:absolute;
+    left:0;top:0;height:100%;
+    background:#4285f4;
+    border-radius:20px;
+    width:0%;
+    transition:width .35s ease;
+  }
+  .dot{
+    position:absolute;
+    top:50%;
+    width:24px;height:24px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:#fff;
+    border:1px solid #ddd;
+    box-shadow:0 1px 5px rgba(0,0,0,.15);
+    cursor:pointer;
+    transition:.25s;
+  }
+  .dot.active{
+    width:28px;height:28px;
+    border:4px solid #4285f4;
+  }
+  .nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 0 0;
+  }
+  button{
+    border:0;
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:12px;
+    padding:9px 17px;
+    font-size:15px;
+    cursor:pointer;
+  }
+  button:hover{background:#f1f5ff}
+  .step{
+    color:#888;
+    font-family:Arial,sans-serif;
+    font-size:13px;
+  }
+  svg{width:100%;height:100%}
+  .label{
+    font-family:Arial,sans-serif;
+    font-size:18px;
+    fill:#444;
+  }
+  .blue{
+    fill:#4285f4;
+    stroke:#4285f4;
+  }
+  .organ{fill:#e56a2f}
+  .body{fill:#7890a5}
+  .line{
+    stroke:#4285f4;
+    stroke-width:5;
+    fill:none;
+    stroke-linecap:round;
+    marker-end:url(#arrow);
+  }
+  .soft{
+    stroke:#b9d3ff;
+    stroke-width:2;
+    fill:none;
+    opacity:.55;
+  }
+  .hidden{opacity:0;pointer-events:none}
+  .show{opacity:1;transition:opacity .45s ease}
+  .pulse{animation:pulse 1.3s infinite}
+  @keyframes pulse{
+    0%,100%{opacity:.45}
+    50%{opacity:1}
+  }
+  .hormone{
+    fill:#8b5cf6;
+    stroke:#6d3fd0;
+    stroke-width:2;
+  }
+  .cortisol{
+    fill:#f2b84b;
+    stroke:#cc8b13;
+    stroke-width:2;
+  }
+  .feedback{
+    stroke:#7b61a8;
+    stroke-width:3;
+    fill:none;
+    stroke-dasharray:8 7;
+    marker-end:url(#arrowPurple);
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="visual">
+    <svg viewBox="0 0 1100 500" aria-label="Interactive HPA axis diagram">
+      <defs>
+        <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto">
+          <path d="M0,0 L10,4 L0,8 Z" fill="#4285f4"/>
+        </marker>
+        <marker id="arrowPurple" markerWidth="12" markerHeight="12" refX="9" refY="4" orient="auto">
+          <path d="M0,0 L10,4 L0,8 Z" fill="#7b61a8"/>
+        </marker>
+        <radialGradient id="halo">
+          <stop offset="0" stop-color="#4285f4" stop-opacity=".20"/>
+          <stop offset="1" stop-color="#4285f4" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- subtle body halo -->
+      <circle cx="550" cy="255" r="180" fill="url(#halo)" opacity=".28"/>
+
+      <!-- simplified human silhouette -->
+      <circle cx="550" cy="91" r="28" class="body"/>
+      <path class="body" d="M515 126 Q550 110 585 126 L602 207 Q596 240 579 269 L578 404
+        L556 404 L550 287 L544 404 L522 404 L521 269 Q504 240 498 207 Z"/>
+      <path class="body" d="M505 135 L473 228 Q469 243 481 249 L495 246 L525 171 Z"/>
+      <path class="body" d="M595 135 L627 228 Q631 243 619 249 L605 246 L575 171 Z"/>
+
+      <!-- adrenal glands -->
+      <g id="adrenals">
+        <path class="organ" d="M518 224 C504 211 503 190 518 182 C528 177 538 185 538 198 C538 212 531 223 518 224Z"/>
+        <path class="organ" d="M582 224 C596 211 597 190 582 182 C572 177 562 185 562 198 C562 212 569 223 582 224Z"/>
+      </g>
+
+      <!-- hypothalamus / pituitary markers -->
+      <ellipse cx="550" cy="105" rx="12" ry="7" fill="#4285f4" class="hidden" id="hypo"/>
+      <ellipse cx="550" cy="126" rx="9" ry="5" fill="#4285f4" class="hidden" id="pit"/>
+
+      <!-- labels -->
+      <text x="635" y="108" class="label hidden" id="lhypo">Hypothalamus</text>
+      <text x="635" y="133" class="label hidden" id="lpit">Anterior pituitary</text>
+      <text x="638" y="207" class="label hidden" id="ladrenal">Adrenal cortex</text>
+
+      <!-- stressor -->
+      <text x="315" y="210" class="label blue hidden" id="lstressor">Stressor</text>
+      <path d="M420 202 Q475 190 515 116" class="line hidden" id="stressarrow"/>
+
+      <!-- CRH -->
+      <g class="hidden" id="crh">
+        <circle cx="550" cy="145" r="10" class="hormone"/>
+        <circle cx="550" cy="165" r="10" class="hormone"/>
+        <text x="585" y="157" class="label">CRH</text>
+        <path d="M550 138 L550 128" class="line"/>
+      </g>
+
+      <!-- ACTH -->
+      <g class="hidden" id="acth">
+        <circle cx="550" cy="185" r="10" class="hormone"/>
+        <circle cx="550" cy="205" r="10" class="hormone"/>
+        <text x="585" y="198" class="label">ACTH</text>
+        <path d="M550 178 L550 158" class="line"/>
+      </g>
+
+      <!-- cortisol -->
+      <g class="hidden" id="cort">
+        <circle cx="550" cy="250" r="11" class="cortisol"/>
+        <circle cx="550" cy="274" r="11" class="cortisol"/>
+        <circle cx="550" cy="298" r="11" class="cortisol"/>
+        <text x="585" y="275" class="label">Cortisol</text>
+        <path d="M550 238 L550 213" class="line"/>
+      </g>
+
+      <!-- circulation / effects -->
+      <g class="hidden" id="effects">
+        <path d="M550 306 Q485 335 440 350" class="soft"/>
+        <path d="M550 306 Q615 335 660 350" class="soft"/>
+        <text x="365" y="385" class="label">Energy mobilization</text>
+        <text x="640" y="385" class="label">Immune modulation</text>
+      </g>
+
+      <!-- negative feedback -->
+      <g class="hidden" id="feed">
+        <path d="M610 245 C750 220 750 70 575 105" class="feedback"/>
+        <text x="735" y="112" class="label">Negative feedback</text>
+      </g>
+
+      <!-- chronic stress -->
+      <g class="hidden" id="chronic">
+        <circle cx="550" cy="105" r="55" fill="none" stroke="#7b61a8" stroke-width="3" opacity=".6" class="pulse"/>
+        <text x="350" y="465" class="label" style="fill:#7b61a8;font-weight:bold">Chronic stress → potential HPA-axis dysregulation</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="caption" id="caption">A stressor activates the hypothalamus</div>
+
+  <div class="controls">
+    <div class="track" id="track">
+      <div class="progress" id="progress"></div>
+      <div class="dot active" data-i="0" style="left:0%"></div>
+      <div class="dot" data-i="1" style="left:16.67%"></div>
+      <div class="dot" data-i="2" style="left:33.33%"></div>
+      <div class="dot" data-i="3" style="left:50%"></div>
+      <div class="dot" data-i="4" style="left:66.67%"></div>
+      <div class="dot" data-i="5" style="left:83.33%"></div>
+      <div class="dot" data-i="6" style="left:100%"></div>
+    </div>
+    <div class="nav">
+      <button id="back">← Back</button>
+      <div class="step" id="step">1 / 7</div>
+      <button id="next">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const stages = [
+  {caption:"A stressor activates the hypothalamus", show:["lstressor","stressarrow","hypo","lhypo"]},
+  {caption:"The hypothalamus releases CRH", show:["lstressor","stressarrow","hypo","lhypo","pit","lpit","crh"]},
+  {caption:"CRH stimulates the anterior pituitary to release ACTH", show:["lstressor","hypo","lhypo","pit","lpit","crh","acth"]},
+  {caption:"ACTH travels to the adrenal cortex", show:["hypo","lhypo","pit","lpit","crh","acth","ladrenal"]},
+  {caption:"The adrenal cortex releases cortisol", show:["hypo","lhypo","pit","lpit","crh","acth","ladrenal","cort","effects"]},
+  {caption:"Cortisol provides negative feedback to regulate the response", show:["hypo","lhypo","pit","lpit","crh","acth","ladrenal","cort","effects","feed"]},
+  {caption:"With chronic stress, the HPA axis may become dysregulated", show:["hypo","lhypo","pit","lpit","crh","acth","ladrenal","cort","effects","feed","chronic"]}
+];
+
+let current=0;
+const caption=document.getElementById("caption");
+const progress=document.getElementById("progress");
+const dots=[...document.querySelectorAll(".dot")];
+const step=document.getElementById("step");
+
+function render(i){
+  current=Math.max(0,Math.min(stages.length-1,i));
+  document.querySelectorAll(".hidden,.show").forEach(el=>{
+    if(el.classList.contains("show")) el.classList.remove("show");
+    el.classList.add("hidden");
+  });
+  stages[current].show.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.classList.remove("hidden");el.classList.add("show");}
+  });
+  caption.textContent=stages[current].caption;
+  progress.style.width=(current/(stages.length-1)*100)+"%";
+  dots.forEach((d,j)=>d.classList.toggle("active",j===current));
+  step.textContent=(current+1)+" / "+stages.length;
+}
+document.getElementById("next").onclick=()=>render(current+1);
+document.getElementById("back").onclick=()=>render(current-1);
+dots.forEach(d=>d.onclick=()=>render(+d.dataset.i));
+document.getElementById("track").onclick=e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  render(Math.round(((e.clientX-r.left)/r.width)*(stages.length-1)));
+};
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight") render(current+1);
+  if(e.key==="ArrowLeft") render(current-1);
+});
+render(0);
+</script>
+</body>
+</html>

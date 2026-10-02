@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SNS Activation Interactive</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f6f8;color:#172033;margin:0;padding:30px}.wrap{max-width:1100px;margin:auto}
+.stage{background:linear-gradient(135deg,#f8fafc,#eef3f8);border:1px solid #d8dee7;border-radius:20px;padding:25px}
+h1{margin:0 0 5px;font-size:30px}.muted{color:#5c6470}.flow{display:flex;gap:8px;align-items:center;overflow:auto;padding:20px 0}
+.node{min-width:120px;padding:12px;text-align:center;background:white;border:1px solid #d8dee7;border-radius:14px;font-weight:bold;cursor:pointer}.active{border:2px solid #d96b52!important;background:#fff3ef!important}
+.arrow{font-size:22px}.main{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:16px}.card{background:white;border:1px solid #d8dee7;border-radius:18px;padding:22px;text-align:center;min-height:160px}.icon{font-size:55px}.big{font-size:20px;font-weight:bold;margin:10px}.small{font-size:13px}.outcome{text-align:left;background:#fff7f4;padding:9px;margin:7px;border-radius:9px}
+.caption{margin-top:16px;padding:14px;border-left:4px solid #d96b52;background:#fff3ef;border-radius:10px;line-height:1.5}.controls{display:flex;gap:15px;align-items:center;margin-top:18px}
+button{padding:11px 18px;border-radius:10px;border:1px solid #cbd2da;background:white;font-weight:bold;cursor:pointer}button.primary{background:#172033;color:white}
+.progress{height:7px;background:#dfe4ea;border-radius:99px;flex:1}.bar{height:100%;background:#d96b52;border-radius:99px;width:14%}
+@media(max-width:700px){.main{grid-template-columns:1fr}.flow{display:none}}
+</style></head><body><div class="wrap"><div class="stage">
+<h1>Sympathetic Nervous System (SNS) Activation</h1><div class="muted">The body's rapid-response alarm system — move through the pathway</div>
+<div class="flow" id="flow"></div><div class="main" id="main"></div><div class="caption" id="caption"></div>
+<div class="controls"><button id="prev">← Back</button><div class="progress"><div class="bar" id="bar"></div></div><button class="primary" id="next">Next →</button></div>
+</div></div>
+<script>
+const S=[
+["🧓","SOCIAL ISOLATION","Persistent psychosocial stress","We start with social isolation. When social disconnection becomes chronic, it may be experienced as a psychosocial stressor."],
+["🧠","PERCEIVED STRESS","Brain interprets ongoing stress","The brain interprets the ongoing stress and engages the body's rapid-response alarm system."],
+["🧠","HYPOTHALAMUS","Activates sympathetic pathways","The hypothalamus activates sympathetic pathways, initiating a rapid autonomic response."],
+["⚡","SNS ACTIVATION","Sympathetic nerves + adrenal medulla","Signals travel through sympathetic nerves, and the adrenal medulla is also activated."],
+["🧪","ADRENALINE + NORADRENALINE","Released into bloodstream","The adrenal medulla releases adrenaline and noradrenaline, preparing the body for immediate action."],
+["⚙️","PHYSIOLOGICAL RESPONSES","Fight-or-flight response","Now we see the familiar fight-or-flight responses: heart rate and blood pressure rise, breathing increases, and alertness increases."],
+["⏱️","CHRONIC ACTIVATION","Less recovery → physiological burden","These responses are adaptive in the short term. The concern is repeated activation without adequate recovery, which can contribute to autonomic dysregulation and cumulative physiological burden."]
+];
+let step=0; const flow=document.getElementById("flow");
+S.forEach((s,i)=>{let n=document.createElement("div");n.className="node";n.textContent=s[1];n.onclick=()=>{step=i;render()};flow.appendChild(n);if(i<S.length-1){let a=document.createElement("span");a.className="arrow";a.textContent="→";flow.appendChild(a)}});
+function render(){document.querySelectorAll(".node").forEach((n,i)=>n.classList.toggle("active",i===step));let s=S[step];
+let r=step>=5?'<div class="outcome">❤️ <b>Heart rate ↑</b><br><span class="small">Faster cardiac output</span></div><div class="outcome">🩸 <b>Blood pressure ↑</b><br><span class="small">Vasoconstriction</span></div><div class="outcome">🫁 <b>Breathing ↑</b><br><span class="small">More oxygen availability</span></div><div class="outcome">👁️ <b>Alertness ↑</b><br><span class="small">Heightened vigilance</span></div>':'<div style="font-size:40px;margin-top:30px">→</div><div class="small muted">Advance to reveal the next step.</div>';
+document.getElementById("main").innerHTML='<div class="card"><div class="icon">'+s[0]+'</div><div class="small muted">STAGE '+(step+1)+'</div></div><div class="card"><div class="icon">'+(step<2?'🧠':step<5?'⚡':'⚙️')+'</div><div class="big">'+s[1]+'</div><div class="muted small">'+s[2]+'</div></div><div class="card"><b>WHAT CHANGES?</b>'+r+'</div>';
+document.getElementById("caption").textContent=s[3];document.getElementById("bar").style.width=((step+1)/S.length*100)+'%';document.getElementById("prev").disabled=step===0;document.getElementById("next").textContent=step===S.length-1?'Restart':'Next →'}
+document.getElementById("next").onclick=()=>{step=step===S.length-1?0:step+1;render()};document.getElementById("prev").onclick=()=>{if(step>0){step--;render()}};render();
+</script></body></html>
